@@ -3,6 +3,9 @@
 // var keys = require("./keys.js");
 // var spotify = new Spotify(keys.spotify);
 
+var moment = require('moment');
+moment().format();
+
 var command = process.argv[2];
 var value = process.argv[3];
 
@@ -36,6 +39,14 @@ switch (command) {
     case "help":
         help();
         break;
+    case "concert-this":
+        if (process.argv[3] == null){
+            console.log("\nPlease follow correct format ->> concert-this <artist/band name here>");
+            break;
+        } else {
+            concert(value);
+            break;
+        }
     case "movie-this":
         if (process.argv[3] == null){
             omdb("Mr. Nobody");
@@ -45,6 +56,23 @@ switch (command) {
         break;
     default:
         console.log("Hello?");
+}
+
+function concert(input) {
+    axios.get("https://rest.bandsintown.com/artists/" + input + "/events?app_id=codingbootcamp").then(
+        function (response) {
+
+            for(var i=0; i<response.data.length; i++){
+                console.log("\nName of Venue: " + response.data[i].venue.name);
+                if (response.data[i].venue.region === ""){
+                    console.log("Venue Location: " + response.data[i].venue.city);
+                } else {
+                    console.log("Venue Location: " + response.data[i].venue.city + ", " + response.data[i].venue.region);
+                }
+                console.log("Date of the event: " + response.data[i].datetime);
+            }
+        }
+    );
 }
 
 function omdb(input) {
