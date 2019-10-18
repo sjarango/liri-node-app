@@ -1,7 +1,8 @@
-// require("dotenv").config();
+require("dotenv").config();
 
-// var keys = require("./keys.js");
-// var spotify = new Spotify(keys.spotify);
+var keys = require("./keys.js");
+var Spotify = require('node-spotify-api');
+var spotify = new Spotify(keys.spotify);
 
 var moment = require('moment');
 moment().format();
@@ -20,17 +21,16 @@ function help() {
     console.groupEnd();
 }
 
-function inputConcat(){
-    if (process.argv.length > 3){
-        for(var i=3; i<process.argv.length; i++){
-            if (process.argv[i+1] != null){
+function inputConcat() {
+    if (process.argv.length > 3) {
+        for (var i = 3; i < process.argv.length; i++) {
+            if (process.argv[i + 1] != null) {
                 value = value.concat(" ");
-                value = value.concat(process.argv[i+1]);
+                value = value.concat(process.argv[i + 1]);
             }
         }
     }
 }
-
 inputConcat();
 
 var axios = require("axios");
@@ -40,15 +40,23 @@ switch (command) {
         help();
         break;
     case "concert-this":
-        if (process.argv[3] == null){
+        if (process.argv[3] == null) {
             console.log("\nPlease follow correct format ->> concert-this <artist/band name here>");
             break;
         } else {
             concert(value);
             break;
         }
+    case "spotify-this-song":
+        if (process.argv[3] == null) {
+            songSearch("The Sign");
+            break;
+        } else {
+            songSearch(value);
+            break;
+        }
     case "movie-this":
-        if (process.argv[3] == null){
+        if (process.argv[3] == null) {
             omdb("Mr. Nobody");
         } else {
             omdb(value);
@@ -62,17 +70,43 @@ function concert(input) {
     axios.get("https://rest.bandsintown.com/artists/" + input + "/events?app_id=codingbootcamp").then(
         function (response) {
 
-            for(var i=0; i<response.data.length; i++){
+            for (var i = 0; i < response.data.length; i++) {
                 console.log("\nName of Venue: " + response.data[i].venue.name);
-                if (response.data[i].venue.region === ""){
+                if (response.data[i].venue.region === "") {
                     console.log("Venue Location: " + response.data[i].venue.city);
                 } else {
                     console.log("Venue Location: " + response.data[i].venue.city + ", " + response.data[i].venue.region);
                 }
-                console.log("Date of the event: " + response.data[i].datetime);
+                var date = response.data[i].datetime;
+                var time = moment(date).format("MM/DD/YYYY");
+                console.log("Date of the event: " + time);
             }
         }
     );
+}
+
+function songSearch(input) {
+    //console.log(input);
+    spotify.search(
+        {
+            type: 'track',
+            query: input
+        },
+        function(err, data) {
+            if(err){
+                return console.log('Error occurred ' + err);
+            }
+            //console.log(data);
+            var songs = data.tracks.items;
+
+            for(var i = 0; i < songs.length; i++){
+                console.log(i);
+                console.log("Song name: " + songs[i].name);
+                console.log("Preview song: " + songs[i].preview_url);
+                console.log("Album: " + songs[i].album.name);
+                console.log("Artist(s): " + songs[i].artists[0].name);
+            }
+        });
 }
 
 function omdb(input) {
@@ -80,7 +114,7 @@ function omdb(input) {
         function (response) {
             console.log('\n   Title: ' + response.data.Title);
             console.log('   Year: ' + response.data.Year);
-            console.log('   IMDB Rating: '+ response.data.imdbRating);
+            console.log('   IMDB Rating: ' + response.data.imdbRating);
             console.log('   Rotten Tomatoes Rating: ' + response.data.Ratings[1].Value);
             console.log('   Produced: ' + response.data.Country);
             console.log('   Language: ' + response.data.Language);
