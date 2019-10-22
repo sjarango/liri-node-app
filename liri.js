@@ -104,7 +104,19 @@ function songSearch(input) {
                 console.log("Song name: " + songs[i].name);
                 console.log("Preview song: " + songs[i].preview_url);
                 console.log("Album: " + songs[i].album.name);
-                console.log("Artist(s): " + songs[i].artists[0].name);
+                if (songs[i].artists.length > 1){
+                    let artists = "Artist(s): ";
+                    for(var n = 0; n < songs[i].artists.length; n++){
+                        artists = artists.concat(songs[i].artists[n].name);
+                        if(songs[i].artists[n+1] != null){
+                            artists = artists.concat(", ");
+                        }
+                    }
+                    console.log(artists);
+                } else{
+                    console.log("Artist(s): " + songs[i].artists[0].name);
+                }
+                
             }
         });
 }
