@@ -7,9 +7,13 @@ var spotify = new Spotify(keys.spotify);
 var moment = require('moment');
 moment().format();
 
+const fs = require('fs');
+const axios = require("axios");
+
 var command = process.argv[2];
 var value = process.argv[3];
 
+// function to show how application works
 function help() {
     console.group('\nHelp Menu:');
     console.log('To run program correctly please type "node liri.js" to run the program then the correct commands.');
@@ -21,6 +25,7 @@ function help() {
     console.groupEnd();
 }
 
+// concats user input after argv[2] command agrument into one string to be read/used for inputting into API's
 function inputConcat() {
     if (process.argv.length > 3) {
         for (var i = 3; i < process.argv.length; i++) {
@@ -31,41 +36,50 @@ function inputConcat() {
         }
     }
 }
+
+// executes functions
 inputConcat();
+userInputs(command, value);
 
-var axios = require("axios");
-
-switch (command) {
-    case "help":
-        help();
-        break;
-    case "concert-this":
-        if (process.argv[3] == null) {
-            console.log("\nPlease follow correct format ->> concert-this <artist/band name here>");
+// main function, using user's input to run specific API/Operation 
+function userInputs(userOption, inputParameter){
+    switch (userOption) {
+        case "help":
+            help();
             break;
-        } else {
-            concert(value);
+        case "concert-this":
+            if (inputParameter == null) {
+                console.log("\nPlease follow correct format ->> concert-this <artist/band name here>");
+                break;
+            } else {
+                concert(inputParameter);
+                break;
+            }
+        case "spotify-this-song":
+            if (inputParameter == null) {
+                songSearch("The Sign");
+                break;
+            } else {
+                songSearch(inputParameter);
+                break;
+            }
+        case "movie-this":
+            if (inputParameter == null) {
+                omdb("Mr. Nobody");
+                break;
+            } else {
+                omdb(inputParameter);
+                break;
+            }
+        case "do-what-it-says":
+            whatItSays();
             break;
-        }
-    case "spotify-this-song":
-        if (process.argv[3] == null) {
-            songSearch("The Sign");
-            break;
-        } else {
-            songSearch(value);
-            break;
-        }
-    case "movie-this":
-        if (process.argv[3] == null) {
-            omdb("Mr. Nobody");
-        } else {
-            omdb(value);
-        }
-        break;
-    default:
-        console.log("Hello?");
+        default:
+            console.log("Hello?");
+    }
 }
 
+// function for concert info: Bands in Town
 function concert(input) {
     axios.get("https://rest.bandsintown.com/artists/" + input + "/events?app_id=codingbootcamp").then(
         function (response) {
@@ -85,6 +99,7 @@ function concert(input) {
     );
 }
 
+// function for song search: Spotify
 function songSearch(input) {
     //console.log(input);
     spotify.search(
@@ -121,6 +136,7 @@ function songSearch(input) {
         });
 }
 
+// function for movie search: OMDB
 function omdb(input) {
     axios.get("http://www.omdbapi.com/?t=" + input + "&y=&plot=short&apikey=trilogy").then(
         function (response) {
@@ -134,4 +150,16 @@ function omdb(input) {
             console.log('   Actors: ' + response.data.Actors);
         }
     );
+}
+
+// function to read out of random.txt file
+function whatItSays(){
+    fs.readFile("random.txt", "utf8", function(err, data){
+        if(err){
+            return console.log(err);
+        } else {
+            var dataArray = data.split(",");
+            userInputs(dataArray[0], dataArray[1]);
+        }
+    });
 }
