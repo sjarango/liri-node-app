@@ -3,10 +3,10 @@
 
 ## Will be using 
 * Node.js to provide library resources and async functionality with multiple API's.
-* Inquirer.js library to create command line interface. Link to library: [Inquirer.js](https://www.npmjs.com/package/inquirer)
 * Node-Spotify-API 
 * Moment
 * DotEnv
+* FS
 
 ## How it works?
     
